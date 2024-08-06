@@ -7,5 +7,9 @@ bool Retangulo::contemPonto(Ponto p) {
     p.y <= rt.y);
 }
 
+bool Retangulo::intercecao(const Retangulo& other) const {
+    return !(other.lb.x > rt.x || other.rt.x < lb.x || other.lb.y > rt.y || other.rt.y < lb.y);
+}
+
 Retangulo::Retangulo(Ponto lb, Ponto rt)
     : lb(lb), rt(rt) {}

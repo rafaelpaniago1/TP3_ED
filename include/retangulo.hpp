@@ -7,6 +7,7 @@ public:
 
     double x, y;
     Ponto(double x, double y) : x(x), y(y) {}
+    Ponto() : x(0), y(0) {};
 
 };
 
@@ -17,6 +18,7 @@ public:
     Ponto lb, rt;
     Retangulo(Ponto lb, Ponto rt);
     bool contemPonto(Ponto p);
+    bool intercecao(const Retangulo& other) const;
 
 };
 
