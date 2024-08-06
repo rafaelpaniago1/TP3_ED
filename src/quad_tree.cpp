@@ -8,6 +8,14 @@ northEast(nullptr),
 southWest(nullptr),
 southEast(nullptr) { }
 
+QuadTree::~QuadTree() {
+    // Desalocar memória dos quadrantes filhos
+    delete northWest;
+    delete northEast;
+    delete southWest;
+    delete southEast;
+}
+
 void QuadTree::buscaKNN(Ponto p, int K, PriorityQueue &pq) {
     if (!l.contemPonto(p)) return;
 
