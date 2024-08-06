@@ -26,7 +26,6 @@ private:
     QuadTree* southWest;
     QuadTree* southEast;
 
-    void clear();  // Method to clear child nodes
 };
 
 #endif
