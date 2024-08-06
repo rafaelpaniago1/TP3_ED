@@ -2,11 +2,10 @@
 #define PRIORITY_H
 #include "quad_tree.hpp"
 
-struct Triple{
+struct Tuple{
 
-    int node;
+    Ponto* point;
     double dis;
-    int portals;
 
 };
 
@@ -14,9 +13,7 @@ class PriorityQueue{
 
     private:
 
-        double* heap; //Array para armazenar o heap.
-        int* indices;
-        int* portals;
+        Tuple* heap; //Array para armazenar o heap.
         int size;     //Tamanho atual do Heap
         int capacity; //Capacidade do Heap
 
@@ -33,11 +30,14 @@ class PriorityQueue{
 
         PriorityQueue(int capacity);//Construir uma fila de prioridade de tamanho definido
         ~PriorityQueue();           //Destrutor da fila de prioridade 
+        PriorityQueue(const PriorityQueue&) = delete;
+        PriorityQueue& operator=(const PriorityQueue&) = delete;
 
-        void push(double key, int index, int used);    //Função para inserir novos nós no heap
-        Triple pop();        //Função para extrair o nó mínimo do 
+        void push(Ponto* point, double distance);    //Função para inserir novos nós no heap
+        Tuple pop();        //Função para extrair o nó mínimo do 
         bool isEmpty() const;
         int getSize() const;
+        Tuple peek() const;
 
 };
 
