@@ -1,6 +1,6 @@
 #ifndef PRIORITY_H
 #define PRIORITY_H
-#include "quad_tree.hpp"
+#include "retangulo.hpp"
 
 struct Tuple{
 

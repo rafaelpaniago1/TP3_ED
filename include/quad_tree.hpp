@@ -1,7 +1,6 @@
 #ifndef QUAD_H
 #define QUAD_H
 
-#include "retangulo.hpp"
 #include "priority_queue.hpp"
 #include "dynamic_array.hpp"
 #include "retangulo.hpp"
