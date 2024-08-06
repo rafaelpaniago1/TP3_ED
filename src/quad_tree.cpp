@@ -8,6 +8,30 @@ northEast(nullptr),
 southWest(nullptr),
 southEast(nullptr) { }
 
+void QuadTree::buscaKNN(Ponto p, int K, PriorityQueue &pq) {
+    if (!l.contemPonto(p)) return;
+
+    // Iterate over points in this node
+    for (int i = 0; i < pontos.size(); ++i) {
+        Ponto& ponto = pontos[i];  // Remove const qualification
+        double dist = p.distancia(ponto);
+
+        if (pq.getSize() < K) {
+            pq.push(&ponto, dist);
+        } else if (dist < pq.peek().dis) {
+            pq.pop();
+            pq.push(&ponto, dist);
+        }
+    }
+
+    // Recursively search in child nodes
+    if (northWest != nullptr) northWest->buscaKNN(p, K, pq);
+    if (northEast != nullptr) northEast->buscaKNN(p, K, pq);
+    if (southWest != nullptr) southWest->buscaKNN(p, K, pq);
+    if (southEast != nullptr) southEast->buscaKNN(p, K, pq);
+}
+
+
 DynamicArray QuadTree::buscaIntervalo(Retangulo r) {
     DynamicArray pontos;
 
@@ -51,9 +75,9 @@ DynamicArray QuadTree::buscaIntervalo(Retangulo r) {
 }
 
 int QuadTree::buscaPonto(const Ponto& _p) const {
-    // If the current point matches, return its data
+    // If the current point matches, return some status or data (here we just return 1 to indicate the point is found)
     if (p.x == _p.x && p.y == _p.y) {
-        return *dados;
+        return 1; // Point found
     }
 
     // Determine the appropriate quadrant and search recursively
@@ -67,7 +91,7 @@ int QuadTree::buscaPonto(const Ponto& _p) const {
         return southEast->buscaPonto(_p);
     }
 
-    return -1;
+    return -1; // Point not found
 }
 
 void QuadTree::dividir() {
