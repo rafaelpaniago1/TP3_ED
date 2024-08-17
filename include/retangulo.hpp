@@ -10,7 +10,7 @@ public:
     std::string id;
     bool active;
     Ponto(double x = 0, double y = 0, std::string id = "", bool active = true) : x(x), y(y), id(id), active(active) {}
-    Ponto() : x(0), y(0) {};
+
     double distancia(const Ponto& other) const {
         double dx = x - other.x;
         double dy = y - other.y;
