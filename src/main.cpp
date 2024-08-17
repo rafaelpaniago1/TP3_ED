@@ -1,110 +1,180 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-// Inclua o arquivo da implementação da quadtree
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <iomanip>
+#include <cstring>   
 #include "quad_tree.hpp"
+#include "endereco.hpp"
+#include "hash_table.hpp"
 
-// struct that contains the information about the recharging locations
-typedef struct {
-    char * idend;
-    long id_logrado;
-    char * sigla_tipo;
-    char * nome_logra;
-    int numero_imo;
-    char * nome_bairr;
-    char * nome_regio;
-    int cep;
-    double x;
-    double y;
-} addr_t, *ptr_addr_t;
+Hash<std::string, Endereco> *loadFile(std::ifstream &inputFile, int NumEnderecos, QuadTree &quadTree)
+{
+    Hash<std::string, Endereco> *estacoes = new Hash<std::string, Endereco>(NumEnderecos);
 
-// struct that contain the distance information between the origin location and
-// each recharging location.
-typedef struct knn {
-    double dist; // distance between origin location and recharging location
-    int id;      // recharging location id
-} knn_t, *ptr_knn_t;
+    std::string line;
 
-// vector containing the information about the recharging locations
-addr_t rechargevet[] = {
-    // Suponha que você tenha uma lista de locais de recarga aqui
-};
+    while (std::getline(inputFile, line))
+    {
+        std::istringstream iss(line);
+        std::string idend, sid_logrado, sigla_tipo, nome_logra, numero_imo, nome_bairr, nome_regio, scep, sx, sy;
+        double x, y;
+        int cep;
+        long id_logradouro;
 
+        if (std::getline(iss, idend, ';') &&
+            std::getline(iss, sid_logrado, ';') &&
+            std::getline(iss, sigla_tipo, ';') &&
+            std::getline(iss, nome_logra, ';') &&
+            std::getline(iss, numero_imo, ';') &&
+            std::getline(iss, nome_bairr, ';') &&
+            std::getline(iss, nome_regio, ';') &&
+            std::getline(iss, scep, ';') &&
+            std::getline(iss, sx, ';') &&
+            std::getline(iss, sy, ';'))
+        {
+            id_logradouro = std::stol(sid_logrado);
+            cep = std::stoi(scep);
+            x = std::stod(sx);
+            y = std::stod(sy);
 
-void printrecharge(int pos) {
-    printf("%s %s, %d, %s, %s, %d", rechargevet[pos].sigla_tipo,
-           rechargevet[pos].nome_logra, rechargevet[pos].numero_imo,
-           rechargevet[pos].nome_bairr, rechargevet[pos].nome_regio,
-           rechargevet[pos].cep);
+            Ponto *ponto = new Ponto(x, y, idend);
+            Endereco *estacao = new Endereco(*ponto, idend, id_logradouro, sigla_tipo, nome_logra, numero_imo, nome_bairr, nome_regio, cep);
+            quadTree.insert(*ponto);
+            estacoes->insert(idend, estacao);
+        }
+    }
+    inputFile.close();
+
+    return estacoes;
 }
 
-void printmap(ptr_knn_t kvet, int kmax, ptr_addr_t rvet, int nrec, double tx, double ty) {
-    FILE *out;
+void consultar(QuadTree &quadTree, Hash<std::string, Endereco> &estacoes, double x, double y, int n)
+{
 
-    out = fopen("out.gp", "wt");
-    fprintf(out, "set term postscript eps\n");
-    fprintf(out, "set output \"out.eps\"\n");
-    fprintf(out, "set size square\n");
-    fprintf(out, "set key bottom right\n");
-    fprintf(out, "set title \"BiUaiDi Recharging Stations\"\n");
-    fprintf(out, "set xlabel \"\"\n");
-    fprintf(out, "set ylabel \"\"\n");
-    fprintf(out, "unset xtics \n");
-    fprintf(out, "unset ytics \n");
-    fprintf(out, "plot \"origin.gpdat\" t \"Your location\" pt 4 ps 2, \"recharge.gpdat\" t \"\", \"suggested.gpdat\" t \"Nearest stations\" pt 7 ps 2\n");
-    fclose(out);
+    Ponto p(x, y);
+    PriorityQueue<Tuple<double, Ponto>> pq(n);
+    quadTree.buscaKNN(p, n, pq);
 
-    out = fopen("origin.gpdat", "wt");
-    fprintf(out, "%f %f\n", tx, ty);
-    fclose(out);
+    pq.mudarModo();
+    while (!pq.isEmpty())
+    {
+        Tuple<double, Ponto> p = pq.peek();
+        pq.pop();
 
-    out = fopen("recharge.gpdat", "wt");
-    for (int i = 0; i < nrec; i++) {
-        fprintf(out, "%f %f\n", rvet[i].x, rvet[i].y);
+        double dist = p.getFirst();
+        std::string id = p.getSecond().getId();
+        Endereco *estacao = estacoes.search(id);
+
+        if (estacao != nullptr)
+        {
+            std::cout << *estacao << std::fixed << std::setprecision(3) << " (" << dist << ")" << std::endl;
+        }
     }
-    fclose(out);
-
-    out = fopen("suggested.gpdat", "wt");
-    for (int i = 0; i < kmax; i++) {
-        fprintf(out, "%f %f\n", rvet[kvet[i].id].x, rvet[kvet[i].id].y);
-    }
-    fclose(out);
 }
 
-int main(int argc, char **argv) {
-    // count the number of recharge locations we have in rechargevet
-    int numrecharge = 0;
-    while (rechargevet[numrecharge].id_logrado != -1) numrecharge++;
+void ativar(QuadTree &quadTree, Hash<std::string, Endereco> &estacoes, int numEnderecos, std::string id)
+{
+    Endereco *estacao = estacoes.search(id);
+    if (estacao == nullptr)
+    {
+        std::cout << "Ponto de recarga " << id << " não encontrado." << std::endl;
+        return;
+    }
+    if (!estacao->ativo)
+    {
+        estacao->activate();
+        std::cout << "Ponto de recarga " << id << " ativado." << std::endl;
+    }
+    else
+    {
+        std::cout << "Ponto de recarga " << id << " já estava ativo." << std::endl;
+    }
+}
 
-    // read the coordinates of the current point that needs recharging
-    double tx = atof(argv[1]);
-    double ty = atof(argv[2]);
+void desativar(QuadTree &quadTree, Hash<std::string, Endereco> &estacoes, int numEnderecos, std::string id)
+{
+    Endereco *estacao = estacoes.search(id);
+    if (estacao == nullptr)
+    {
+        std::cout << "Ponto de recarga " << id << " não encontrado." << std::endl;
+        return;
+    }
+    if (estacao->ativo)
+    {
+        estacao->deactivate();
+        std::cout << "Ponto de recarga " << id << " desativado." << std::endl;
+    }
+    else
+    {
+        std::cout << "Ponto de recarga " << id << " já estava desativado." << std::endl;
+    }
+}
 
-    // Create and populate the quadtree
-    QuadTree *qt;  // Supondo que a função para criar uma quadtree se chame `quadtree_create`
-    for (int i = 0; i < numrecharge; i++) {
-        Ponto* ponto = new Ponto(rechargevet[i].x, rechargevet[i].y);
-        qt->insert(*ponto);
+int main(int argc, char *argv[])
+{
+    std::string line;
+    std::ifstream genFile(argv[1]);
+
+    int numEnderecos;
+
+    if (std::getline(genFile, line))
+    {
+        std::istringstream iss(line);
+        iss >> numEnderecos;
     }
 
-    // Create the vector of distances to store nearest neighbors
-    ptr_knn_t kvet = (ptr_knn_t)malloc(10 * sizeof(knn_t));
-    
-    // Find the 10 nearest recharging locations
-    findNearestNeighbors(qt, tx, ty, 10, kvet);
+    QuadTree quadTree(numEnderecos, Retangulo(Ponto(150000, 7500000), Ponto(7500000, 10000000)));
+    Hash<std::string, Endereco> *estacoes = loadFile(genFile, numEnderecos, quadTree);
 
-    // Print the 10 nearest recharging locations
-    int kmax = 10;
-    for (int i = 0; i < kmax; i++) {
-        printrecharge(kvet[i].id);
-        printf(" (%f)\n", kvet[i].dist);
+    std::ifstream inputFile(argv[2]);
+    int numInputs;
+    if (std::getline(inputFile, line))
+    {
+        std::istringstream iss(line);
+        iss >> numInputs;
     }
 
-    printmap(kvet, kmax, rechargevet, numrecharge, tx, ty);
+    if(argv[3] != NULL && strcmp(argv[3], "lab-test") == 0){
+        std::cout << "INITIALIZED" << std::endl;
+    }
 
-    free(kvet);
-    quadtree_destroy(qt);  // Supondo que a função para destruir a quadtree se chame `quadtree_destroy`
+    while (numInputs-- && std::getline(inputFile, line))
+    {
+        std::cout << line << std::endl;
+        char command = line[0];
+        std::istringstream iss(line.substr(1));
+
+        if (command == 'C')
+        {
+
+            double x, y;
+            int n;
+            iss >> x >> y >> n;
+            consultar(quadTree, *estacoes, x, y, n);
+        }
+        else if (command == 'A')
+        {
+            std::string id;
+            iss >> id;
+            ativar(quadTree, *estacoes, numEnderecos, id);
+        }
+        else if (command == 'D')
+        {
+            std::string id;
+            iss >> id;
+            desativar(quadTree, *estacoes, numEnderecos, id);
+        }
+    }
+
+
+    if(argv[3] != NULL && strcmp(argv[3], "lab-test") == 0){
+        std::cout << "FINISHED" << std::endl;
+    }
+
+    inputFile.close();
+    estacoes->~Hash();
+    quadTree.~QuadTree();
 
     return 0;
 }

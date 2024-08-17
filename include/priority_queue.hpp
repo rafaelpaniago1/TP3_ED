@@ -84,5 +84,6 @@ class PriorityQueue{
 };
 
 template class PriorityQueue<Tuple<double, Ponto>>;
+template class PriorityQueue<Tuple<double, long>>;
 
 #endif

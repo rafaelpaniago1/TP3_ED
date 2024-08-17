@@ -58,6 +58,7 @@ class Retangulo {
 public:
 
     Ponto lb, rt;
+    Retangulo();
     Retangulo(Ponto lb, Ponto rt);
     bool contemPonto(Ponto p);
     bool intercecao(const Retangulo& other) const;

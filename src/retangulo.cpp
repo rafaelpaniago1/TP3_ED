@@ -13,3 +13,5 @@ bool Retangulo::intercecao(const Retangulo& other) const {
 
 Retangulo::Retangulo(Ponto lb, Ponto rt)
     : lb(lb), rt(rt) {}
+
+Retangulo::Retangulo() : lb(0,0) , rt(0,0){}
