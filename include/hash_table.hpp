@@ -31,7 +31,7 @@ struct NoHash
     c chave;
     v valor;
     NoHash* next;
-    NoHash(c c, v v) : chave(c), valor(v), next(nullptr) {}
+    NoHash(c chave, v valor) : chave(chave), valor(valor), next(nullptr) {}
 
 };
 
@@ -63,7 +63,7 @@ class Hash
             {
                 NoHash<c, v *> *prev = entry;
                 entry = entry->next;
-                delete prev->value;  ///< Libera o valor apontado pelo nó.
+                delete prev->valor;  ///< Libera o valor apontado pelo nó.
                 delete prev;  ///< Libera o nó em si.
             }
             table[i] = nullptr;
@@ -71,14 +71,14 @@ class Hash
         delete[] table;  ///< Libera o array de ponteiros.
     }
 
-    void insert(const c &key, v *value)
+    void insert(const c &chave, v *valor)
     {
-        int hashValue = hashFunction(key, tamanho_tabela);  ///< Calcula o valor de hash.
+        int hashValue = hashFunction(chave, tamanho_tabela);  ///< Calcula o valor de hash.
         NoHash<c, v *> *prev = nullptr;
         NoHash<c, v *> *entry = table[hashValue];
 
         // Percorre a lista encadeada na posição de hash até encontrar a chave ou o final da lista.
-        while (entry != nullptr && entry->key != key)
+        while (entry != nullptr && entry->chave != chave)
         {
             prev = entry;
             entry = entry->next;
@@ -87,7 +87,7 @@ class Hash
         if (entry == nullptr)
         {
             // Se a chave não existir, cria um novo nó.
-            entry = new NoHash<c, v *>(key, value);
+            entry = new NoHash<c, v *>(chave, valor);
             if (prev == nullptr)
             {
                 table[hashValue] = entry;  ///< Insere o nó na tabela.
@@ -100,23 +100,23 @@ class Hash
         else
         {
             // Se a chave já existir, atualiza o valor.
-            entry->value = value;
+            entry->valor = valor;
         }
     }
 
     
-    v *search(const c &key)
+    v *search(const c &chave)
     {
-        int hashValue = hashFunction(key, tamanho_tabela);  ///< Calcula o valor de hash.
+        int hashValue = hashFunction(chave, tamanho_tabela);  ///< Calcula o valor de hash.
         NoHash<c, v *> *entry = table[hashValue];
 
         // Percorre a lista encadeada na posição de hash.
         while (entry != nullptr)
         {
             // Se encontrar a chave, retorna o valor associado.
-            if (entry->key == key)
+            if (entry->chave == chave)
             {
-                return entry->value;
+                return entry->valor;
             }
 
             entry = entry->next;  ///< Avança para o próximo nó.

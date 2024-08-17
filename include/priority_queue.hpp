@@ -2,43 +2,86 @@
 #define PRIORITY_H
 #include "retangulo.hpp"
 
-struct Tuple{
+template <typename one, typename two>
+class Tuple {
+public:
 
-    Ponto* point;
-    double dis;
+    Tuple() : first(one()), second(two()) {}
 
+    Tuple(const one &first, const two &second) : first(first), second(second) {}
+
+    one getFirst() const {
+        return first;
+    }
+    two getSecond() const {
+        return second;
+    }
+    void setFirst(const one &value) {
+        first = value;
+    }
+    void setSecond(const two &value) {
+        second = value;
+    }
+    bool operator==(const Tuple &compare) const {
+        return first == compare.first && second == compare.second;
+    }
+    bool operator!=(const Tuple &compare) const {
+        return !(*this == compare);
+    }
+    bool operator<(const Tuple &compare) const {
+        return first < compare.first;
+    }
+    bool operator>(const Tuple &compare) const {
+        return first > compare.first;
+    }
+    bool operator<=(const Tuple &compare) const {
+        return !(*this > compare);
+    }
+    bool operator>=(const Tuple &compare) const {
+        return !(*this < compare);
+    }
+
+private:
+    one first;
+    two second; 
 };
+
+template class Tuple<double, Ponto>;
+template class Tuple<double, long>;
+template class Tuple<double, int>;
+
+template <typename K>
 
 class PriorityQueue{
 
     private:
 
-        Tuple* heap; //Array para armazenar o heap.
+        K* heap; //Array para armazenar o heap.
         int size;     //Tamanho atual do Heap
         int capacity; //Capacidade do Heap
+        bool modo;
 
-        int parent(int i) const {return (i - 1)/2; }   //Função para encontrar o pai de um nó do heap
-        int leftChild(int i) const {return (2*i+1);} //Função para encontrar o filho da esquerda do nó
-        int rightChild(int i) const {return (2*i+2);}//Função para encontrar o filho da direita do nó
+        int parent(int index) const;   //Função para encontrar o pai de um nó do heap
+        int leftChild(int index) const;
+        int rightChild(int index) const;
 
-        void Swap(int index1, int index2);
+        void swap(int index1, int index2);
 
         void HeapifyUp(int index);  //Função para manter a propriedade do Heap ao subir
         void HeapifyDown(int index);//Função para manter a propriedade do Heap ao descer
 
     public:
 
-        PriorityQueue(int capacity);//Construir uma fila de prioridade de tamanho definido
+        void mudarModo();
+        PriorityQueue(int capacity = 15000, bool mode = false);
         ~PriorityQueue();           //Destrutor da fila de prioridade 
-        PriorityQueue(const PriorityQueue&) = delete;
-        PriorityQueue& operator=(const PriorityQueue&) = delete;
 
-        void push(Ponto* point, double distance);    //Função para inserir novos nós no heap
-        Tuple pop();        //Função para extrair o nó mínimo do 
+        void push(K data);  
+        K peek() const; 
+        void pop();        //Função para extrair o nó mínimo do 
         bool isEmpty() const;
         int getSize() const;
-        Tuple peek() const;
-
+    
 };
 
 #endif
