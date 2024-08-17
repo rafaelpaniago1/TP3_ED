@@ -16,6 +16,7 @@ struct Endereco{
     std::string nome_bairr;
     std::string nome_regio;
     int cep;
+    bool ativo = true;
 
     Endereco() = default;
 
@@ -24,7 +25,16 @@ struct Endereco{
             const std::string &nome_regio, int cep)
     : ponto(&ponto), idend(idend), id_logrado(id_logrado), sigla_tipo(sigla_tipo), nome_logra(nome_logra),
         numero_imo(numero_imo), nome_bairr(nome_bairr), nome_regio(nome_regio), cep(cep) {}
-
+    void activate()
+    {
+        ativo = true;
+        ponto->activate();
+    }
+    void deactivate()
+    {
+        ativo = false;
+        ponto->deactivate();
+    }
 };
 
 std::ostream &operator<<(std::ostream &os, const Endereco &address)

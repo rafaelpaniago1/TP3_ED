@@ -3,11 +3,11 @@
 #include <iostream>
     
 template <typename K>
-void PriorityQueue<K>::swap(int index1, int index2)
+void PriorityQueue<K>::swap(K &a, K &b)
 {
-    K temp = heap[index1];
-    heap[index1] = heap[index2];
-    heap[index2] = temp;
+    K temp = a;
+    a = b;
+    b = temp;
 }
 
 template <typename K>
@@ -18,7 +18,7 @@ void PriorityQueue<K>::HeapifyUp(int index)
         if (index && heap[parent(index)] > heap[index])
         {
             swap(heap[index], heap[parent(index)]);
-            heapifyUp(parent(index));
+            HeapifyUp(parent(index));
         }
     }
     else
@@ -26,7 +26,7 @@ void PriorityQueue<K>::HeapifyUp(int index)
         if (index && heap[parent(index)] < heap[index])
         {
             swap(heap[index], heap[parent(index)]);
-            heapifyUp(parent(index));
+            HeapifyUp(parent(index));
         }
     }
 }
@@ -77,7 +77,7 @@ void PriorityQueue<K>::push(K data) {
     if (size == capacity) {
         throw std::overflow_error("Heap is full");
     }
-    heap[0] = data;
+    heap[0] = data; 
     HeapifyUp(size);
     size++;
 }
@@ -103,7 +103,7 @@ void PriorityQueue<K>::pop()
     {
         throw std::underflow_error("Priority Queue is empty.");
     }
-    heap[0] = heap[--heap];
+    heap[0] = heap[--size];
     HeapifyDown(0);
 }
 

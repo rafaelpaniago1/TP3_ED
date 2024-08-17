@@ -65,7 +65,7 @@ class PriorityQueue{
         int leftChild(int index) const;
         int rightChild(int index) const;
 
-        void swap(int index1, int index2);
+        void swap(K &a, K &b);
 
         void HeapifyUp(int index);  //Função para manter a propriedade do Heap ao subir
         void HeapifyDown(int index);//Função para manter a propriedade do Heap ao descer
@@ -81,7 +81,8 @@ class PriorityQueue{
         void pop();        //Função para extrair o nó mínimo do 
         bool isEmpty() const;
         int getSize() const;
-    
 };
+
+template class PriorityQueue<Tuple<double, Ponto>>;
 
 #endif
